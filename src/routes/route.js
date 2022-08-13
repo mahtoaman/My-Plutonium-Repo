@@ -41,33 +41,80 @@ router.post("/players", function (req, res) {
 
 //problem 2 -- voting status
 
-let persons = [
-  { name: "PK", age: 10, votingStatus: false },
-  { name: "SK", age: 20, votingStatus: false },
-  {
-    name: "AA",
-    age: 70,
-    votingStatus: false,
-  },
-  {
-    name: "SC",
-    age: 5,
-    votingStatus: false,
-  },
-  { name: "HO", age: 40, votingStatus: false },
-];
+// let persons = [
+//   { name: "PK", age: 10, votingStatus: false },
+//   { name: "SK", age: 20, votingStatus: false },
+//   {
+//     name: "AA",
+//     age: 70,
+//     votingStatus: false,
+//   },
+//   {
+//     name: "SC",
+//     age: 5,
+//     votingStatus: false,
+//   },
+//   { name: "HO", age: 40, votingStatus: false },
+// ];
 
-router.post("/persons", function (req, res) {
-  let personCanVote = [];
-  let votingAge = req.query.inputAge;
-  for (let i = 0; i < persons.length; i++) {
-    let personAge = persons[i].age;
-    if (personAge > votingAge) {
-      persons[i].votingStatus  = true;
-    }
+// router.post("/persons", function (req, res) {
+//   let personCanVote = [];
+//   let votingAge = req.query.inputAge;
+//   for (let i = 0; i < persons.length; i++) {
+//     let personAge = persons[i].age;
+//     if (personAge > votingAge) {
+//       persons[i].votingStatus  = true;
+//     }
+//   }
+//   personCanVote = persons.filter((person) => person.age > votingAge);
+//   res.send(personCanVote);
+// });
+
+
+let person = [
+  {
+  name : "PK",
+  age : 10,
+  votingStatus : false
+},
+{
+  name : "SK",
+  age : 20,
+  votingStatus : false
+},
+{
+  name : "AA",
+  age : 70,
+  votingStatus : false
+},
+{
+  name : "SC",
+  age : 5,
+  votingStatus : false
+},
+{
+  name : "HQ",
+  age : 40,
+  votingStatus : false
+}
+]
+router.post('/personAge', function(req,res){
+let eligiblePerson = []
+let eligibleAge = req.query.age
+for(let i=0; i<person.length; i++)
+{
+  let pAge= person[i].age
+  if(pAge>eligibleAge)
+  {
+      person[i].votingStatus = true
   }
-  personCanVote = persons.filter((person) => person.age > votingAge);
-  res.send(personCanVote);
-});
+  
+}
+eligiblePerson = person.filter((personAge)=>personAge.age>eligibleAge)
+res.send(eligiblePerson)
+})
+
+
+
 
 module.exports = router;
