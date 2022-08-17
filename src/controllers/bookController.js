@@ -10,7 +10,7 @@ const createBook = async function (req, res) {
 
 // gives all the books- their bookName and authorName only 
 const bookList = async function (req, res) {
-    let bookList = await bookDetails.find().select({bookName:1,authorName:1})
+    let bookList = await bookDetails.find().select({bookName:1,authorName:1,_id:0})
     // let bookList = await bookDetails.find().count()
     res.send({msg: bookList})
 }
@@ -39,6 +39,7 @@ const getParticularBooks = async function (req, res) {
 
 //request to return all books who have an Indian price tag of “100INR” or “200INR” or “500INR” 
 const getXNIRBooks = async function (req, res) {
+    // let XNIRBooks = await bookDetails.find({$or:[{"prices.indianPrice":"₹100"},{"prices.indianPrice":"₹100"},{"prices.indianPrice":"₹100"}]})
     let XNIRBooks = await bookDetails.find({"prices.indianPrice":{$in:["₹100","₹200","₹500"]}})
     res.send({msg: XNIRBooks})
 }
