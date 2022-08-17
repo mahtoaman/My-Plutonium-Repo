@@ -1,28 +1,19 @@
-//Create a books collection in your DB ( using bookModel with following fields)- bookName( mandatory field), price containing 
+//Create a books collection in your DB ( using bookModel with following fields)- name( mandatory field), price containing 
 //Indian and european price, year ( should be 2021 if no year is provided) , tags array, authorName, totalPages , stockAvailable ( true false) 
 
 const mongoose = require('mongoose');
 
 const bookSchema = new mongoose.Schema( {
 
-    bookName: {
-        type : String,
-        required : true    
-    },
-    prices: {
-        indianPrice: String,
-        europePrice: String,
-    },
-    year: {
+    name: {
         type:String,
-        default:'2021'
+        required:true
     },
-
-    tags:[String],
-    authorName:String ,
-    totalPages:Number,
-    stockAvailable:Boolean,
+    
+    author_id : Number,
+    price:Number,
+    ratings:Number
 
 }, { timestamps: true });
 
-module.exports = mongoose.model('newBook', bookSchema)
+module.exports = mongoose.model('new_book',bookSchema)

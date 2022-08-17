@@ -1,61 +1,52 @@
 
-const bookDetails = require("../models/bookModel")
+const bookModel = require("../models/bookModel")
+const authorModel = require("../models/authorModel")
 
-// to create a new entry..use this api to create 11+ entries in your collection
+//If author_id is not available then do not accept the entry
+//(in neither the author collection nor the books collection)
+
 const createBook = async function (req, res) {
     let data = req.body
-    let savedData = await bookDetails.create(data)
+    let savedData = await bookModel.create(data)
     res.send({msg: savedData})
 }
+//List out the books written by "Chetan Bhagat" 
+//( this will need 2 DB queries one after another- first query will find the author_id for "Chetan Bhagat”. Then next query will get the list of books with that author_id )
 
-// gives all the books- their bookName and authorName only 
-const bookList = async function (req, res) {
-    let bookList = await bookDetails.find().select({bookName:1,authorName:1,_id:0})
-    // let bookList = await bookDetails.find().count()
-    res.send({msg: bookList})
+const bookByChetanBhagat = async function (req, res) {
+    let authorId = await authorModel.findOne({author_name:"Chetan Bhagat"}).select({author_id:1,_id:0}) //{author_id:1}
+    let bookByChetanBhagat = await bookModel.find(authorId)
+    res.send({msg: bookByChetanBhagat})
+}
+//find the author of “Two states” and update the book price to 100;  
+//Send back the author_name and updated price in response.  ( This will also need 2  queries- 1st will be a findOneAndUpdate. The second will be a find query aith author_id from previous query)
+
+const twoStatesAuthor = async function (req, res) {
+      let updatePrice = await bookModel.findOneAndUpdate(
+        {name:"Two states"},
+        {$set :{price:100}},
+        {new:true}
+      )
+      let authorName = await authorModel.findOne({author_id:updatePrice.author_id}) //.select({author_name:1})
+      res.send( {authorName:authorName.author_name,newPrice:updatePrice.price})
 }
 
 
-//takes year as year in post request and gives list of all books published that year
-const getBooksInYear = async function (req, res) {
-    let year = req.body.year
-    let getBookByYear = await bookDetails.find({year:{$eq:year}})
-    res.send({msg: getBookByYear})
+//Find the books which costs between 50-100(50,100 inclusive) 
+//and respond back with the author names of respective books.
+
+const bookInRange = async function (req, res) {
+    let allBooks = await bookModel.find( { price : { $gte: 50, $lte: 100} } ).select({ author_id :1,_id:0}) //[{author_id :1},1,1,1,2,2]
+    let resultArr = []
+    for(let i=0;i<allBooks.length;i++){
+    // let getAuthorId = allBooks[i]
+    let finalResult = await authorModel.find(allBooks[i]).select({author_name:1,_id:0});
+    resultArr.push(finalResult)
 }
-
-// (this is a good one, make sincere effort to solve this) take any year and use it as a condition to fetch books that satisfy that condition
-// e.g if body had { bookName: “hi”} then you would fetch the books with this name
-// if body had { year: 2020} then you would fetch the books in this year
-// hence the condition will differ based on what you year in the request body
-
-const getParticularBooks = async function (req, res) {
-
-    let input = req.body
-    // console.log(input)
-    //let allBooks = await bookDetails.find({bookName:"Half Girlfriend"})
-    let getParticularBooks = await bookDetails.find(input) 
-    res.send({msg: getParticularBooks})
+res.send( { msg:resultArr})  
 }
-
-//request to return all books who have an Indian price tag of “100INR” or “200INR” or “500INR” 
-const getXNIRBooks = async function (req, res) {
-    // let XNIRBooks = await bookDetails.find({$or:[{"prices.indianPrice":"₹100"},{"prices.indianPrice":"₹100"},{"prices.indianPrice":"₹100"}]})
-    let XNIRBooks = await bookDetails.find({"prices.indianPrice":{$in:["₹100","₹200","₹500"]}})
-    res.send({msg: XNIRBooks})
-}
-
-
-//returns books that are available in stock or have more than 500 pages 
-const getRandomBooks = async function (req, res) {
-    let randomBooks = await bookDetails.find({$or:[{stockAvailable : true}, {totalPages:{$gt:500}}]})
-    res.send({msg: randomBooks})
-}
-
-
 
 module.exports.createBook = createBook
-module.exports.bookList = bookList
-module.exports.getBooksInYear = getBooksInYear
-module.exports.getParticularBooks = getParticularBooks
-module.exports.getXNIRBooks = getXNIRBooks
-module.exports.getRandomBooks = getRandomBooks
+module.exports.bookByChetanBhagat = bookByChetanBhagat
+module.exports.twoStatesAuthor = twoStatesAuthor
+module.exports.bookInRange = bookInRange
