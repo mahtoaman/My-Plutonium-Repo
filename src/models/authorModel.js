@@ -1,19 +1,12 @@
 const mongoose = require('mongoose');
 
-/*
-1. Write down the schemas for book and authors (keeping the data given below in mind).
- Also create the documents (corresponding to the data given below) in your database.
-*/
-const authorSchema = new mongoose.Schema( {
+const authorModel = new mongoose.Schema( {
 
-    author_id:{
-        type:Number,
-        required:true
-    },
-    author_name:String,
+    authorName: String,
     age:Number,
-    address:String
-    
+    address:String,
+    rating:Number
+
 }, { timestamps: true });
 
-module.exports = mongoose.model('author', authorSchema)
+module.exports = mongoose.model('newAuthor', authorModel)
