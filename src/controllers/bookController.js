@@ -14,6 +14,7 @@ const createBook = async function (req, res) {
   let book = req.body;
   let auhtor_id = book.author;
   let publisher_id = book.publisher;
+
   let authorId = await authorModel.findById(auhtor_id); //from authorModel
   let publisherId = await publisherModel.findById(publisher_id); //from publisherModel
 
@@ -27,18 +28,15 @@ const createBook = async function (req, res) {
     return res.send({ msg: "Invalid publisher_id" });
   }
 
-  let bookCreated = await bookModel.create(book);
-  res.send({ data: bookCreated });
+  let createBook = await bookModel.create(book);
+  res.send({ data: createBook });
 };
 
 // 4. Write a GET api that fetches all the books along with their author details
 //(you have to populate for this) as well the publisher details (you have to populate for this)
 
   const getBookWithAuthor = async function (req, res) {
-    let bookwithAuthor = await bookModel
-      .find()
-      .populate("author")
-      .populate("publisher");
+    let bookwithAuthor = await bookModel.find().populate("author").populate("publisher");
     res.send({ data: bookwithAuthor });
   };
 
@@ -47,44 +45,30 @@ Create at least 6 authors with ratings 2, 3, 3.5, 4, 4.5 and 5.
 Create a new PUT api /books and perform the following two operations
  a) Add a new boolean attribute in the book schema called isHardCover with a default false value. 
  For the books published by 'Penguin' and 'HarperCollins', update this key to true. 
+ 
+  b) For the books written by authors having a rating greater than 3.5, 
+  update the books price by 10 (For eg if old price for such a book is 50, new will be 60) 
 Create around 10 books with these publishers and authors.
 */
 
-let upsertAttribute = async function (req, res) {
-  let data = await publisherModel.find({ name: { $in: ["Penguin", "HarperCollins"] } }).select({ _id:1});
-  console.log(data[0]._id);
-  let book = await bookModel.findOne({ publisher: data[0]._id });
-  console.log(book);
-  // let data2 = await publisherModel.find({ name: 'HarperCollins' }).select({_id : true})
-  let update;
-  for (let i = 0; i < data.length; i++) {
-    update = await bookModel.updateMany(
-      { publisher: data[i]._id },
-      { $set: { ishardcover: true } },
-      { upsert: true }
-    );
-  }
-  res.send(update);
+let book = async function (req, res) {
+  let publisherId = await publisherModel.find({ name: { $in: ["Penguin", "HarperCollins)"] } }).select({ _id:1});
+  // console.log(publisherId)
+  let update = await bookModel.updateMany(
+      { publisher : publisherId},
+      { $set: { isHardCover: true } }
+    )
+
+    let authorsId = await authorModel.find({rating:{$gt:3.5}}).select({_id:1})
+     let updateBookPrice = await bookModel.updateMany(
+          {author: authorsId},
+          {$inc: {price: 10}},
+          { new: true}
+     )
+     res.send({data:(update, updateBookPrice)})
 };
 
-/*
- b) For the books written by authors having a rating greater than 3.5, 
- update the books price by 10 (For eg if old price for such a book is 50, new will be 60) 
-*/
-
-const updatePrice = async function (req, res) {
-  let getAuthors = await authorModel.find({ rating: { $gt: 3.5 } });
-  let authorIdList = getAuthors.map((x) => x._id);
-
-  let updateBookPrice = await bookModel.updateMany(
-    { author: authorIdList},
-    { $inc: { price: 10 } },
-    { new: true }
-  );
-  res.send({ data: updateBookPrice });
-};
 
 module.exports.createBook = createBook;
 module.exports.getBookWithAuthor = getBookWithAuthor;
-module.exports.updatePrice = updatePrice;
-module.exports.upsertAttribute = upsertAttribute;
+module.exports.book = book;

@@ -9,7 +9,7 @@ const bookSchema = new mongoose.Schema( {
     },
     isHardCover:{
         type:Boolean,
-        default : true
+        default : false
     },
     price: Number,
     ratings: Number,
