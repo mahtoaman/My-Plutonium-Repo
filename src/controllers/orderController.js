@@ -2,6 +2,7 @@ const { count } = require("console")
 const userModel = require("../models/userModel")
 const orderModel = require("../models/orderModel")
 const productModel = require("../models/productModel")
+const moment = require("moment")
 
 const createOrder= async function (req, res) {
     let data = req.body
@@ -13,11 +14,11 @@ const createOrder= async function (req, res) {
     // console.log("isFreeuser: ",isFreeUser)
 
     let uB = await userModel.findById(newUserId)
-    let userBalance = uB["balance"]
+    
     // console.log("user Balance: ",userBalance)
 
     let productP = await productModel.findById(productId)
-    let productPrice = productP.price
+    
     // console.log("product price",productPrice)
 
     let userId = await userModel.findById(newUserId)
@@ -31,19 +32,23 @@ const createOrder= async function (req, res) {
         else if(!userId){
             return res.send({"msg":"Invalid userId"})
         }
-        else if(!productId){
+        else if(!productP){
             return res.send({"msg":"Invalid productId"})
         }
         
         else if(isFreeUser==="false"){
+            let productPrice = productP.price
+            let userBalance = uB["balance"]
             if(userBalance >= productPrice){
                 let usersNewBalance = userBalance - productPrice
                 await userModel.findOneAndUpdate(
                     {_id : userId},
                     {$set : {balance : usersNewBalance}}
                 );
+                let today = moment().format('YYYY-MM-DD');
                 data['amount']=productPrice;
-                data['isFreeAppUser']=false;
+                // data['isFreeAppUser']=false;
+                data['date'] = today
                 let newData=await orderModel.create(data);
                 res.send({OrderPlaced : newData});
             }
@@ -52,8 +57,10 @@ const createOrder= async function (req, res) {
             }
     }
     else if(isFreeUser==="true"){
+        let today = moment().format('YYYY-MM-DD');
         data['amount']=0;
-        data['isFreeAppUser']=true;
+        // data['isFreeAppUser']=true;
+        data['date'] = today
         let newData=await orderModel.create(data);
         res.send({OrderPlaced : newData});
 

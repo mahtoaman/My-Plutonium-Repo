@@ -7,8 +7,8 @@ const userSchema = new mongoose.Schema( {
         default:100
     },
    address:String,
-	age: Number,
- 	gender:{
+   age: Number,
+   gender:{
         type:String,
         enum:['male', 'female', 'other']
     },
