@@ -1,21 +1,19 @@
 const jwt = require("jsonwebtoken");
 
-const validation = function(req, res, next){
-    let token = req.headers["x-auth-token"]
-    if(!token){
-        return res.send({ status: false, msg: "Token not found" })
-    }
-    else{ 
-        let decodedToken = jwt.verify(token, "This is a secret information");
-        let verUser = decodedToken.userId
-        let uId = req.params.userId
+const validation = function (req, res, next) {
+  let token = req.headers["x-auth-token"];
+  if (!token) return res.send({ status: false, msg: "Token not found" });
+  next();
+};
 
-        if(verUser == uId) next()
-        
-        else return res.send({ status: false, msg: "Token is invalid" });
-        
-    }
-   
-}
+const verification = function (req, res, next) {
+  let token = req.headers["x-auth-token"];
+  let decodedToken = jwt.verify(token, "baat chali hai to door tak jayegi");
+  console.log(); 
 
-module.exports.validation = validation
+  if (decodedToken.userId == req.params.userId) next();
+  else res.send({ status: false, msg: "access denied" });
+};
+
+module.exports.validation = validation;
+module.exports.verification = verification;

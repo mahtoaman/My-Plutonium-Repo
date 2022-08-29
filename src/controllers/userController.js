@@ -11,9 +11,8 @@ const loginUser = async function (req, res) {
   let email = req.body.emailId;
   let password = req.body.password;
   let user = await userModel.findOne({ emailId: email, password: password });
-  if (!user){
-    return res.send({status: false, msg: "Invalid email or password",});
-  }
+  if (!user) return res.send({status: false, msg: "Invalid email or password",});
+  
 
   let token = jwt.sign(
     {
@@ -21,7 +20,7 @@ const loginUser = async function (req, res) {
       month: "August",
       website: "Fackebook",
     },
-    "This is a secret information"
+    "baat chali hai to door tak jayegi"
   );
   res.send({ status: true, token: token });
 };
@@ -37,7 +36,7 @@ const getUserData = async function (req, res) {
 const updateUser = async function (req, res) {
   let userId = req.params.userId;
   let user = await userModel.findById(userId);
-  if(!user) return res.send("No such user exists");
+  if(!user) return res.send({"Error 404":"User not found"});
 
   let userData = req.body;
   let updatedUser = await userModel.findOneAndUpdate({ _id: userId }, userData, {new:true});
@@ -48,7 +47,6 @@ const updateUser = async function (req, res) {
 const delUser = async function (req, res) {
   let userId = req.params.userId;
   let user = await userModel.findById(userId);
-
   if(!user) return res.send({"Error 404":"User not found"});
 
   let deletedUser = await userModel.findOneAndUpdate({ _id: userId }, {$set: {isDeleted: true}},{new:true});
